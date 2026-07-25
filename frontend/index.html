@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Digit Recognizer</title>
+</head>
+<body>
+  <h2>Upload a handwritten digit</h2>
+  <input type="file" id="fileInput" accept="image/*" />
+  <p id="status">Not connected</p>
+  <h1 id="result"></h1>
+<script>
+  const socket = new WebSocket("ws://localhost:8000/ws");
+  socket.onopen = function() {
+    document.getElementById("status").innerText = "Connected";
+  };
+  document.getElementById("fileInput").addEventListener("change", async function(e) {
+    const file = e.target.files[0];
+    const bytes = await file.arrayBuffer();
+    socket.send(bytes);
+  });
+  socket.onmessage = function(e) {
+    const result = JSON.parse(e.data);
+    document.getElementById("result").innerText = `Predicted: ${result.label} (${result.confidence * 100}%)`;
+  };
+</script>
+</body>
+</html>
